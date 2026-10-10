@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f5f4">
+  <title>Pace Calculator - HealthPulse</title>
+  <link rel="icon" type="image/svg+xml" href="img/healthpulse-icon.svg">
+  <meta name="description" content="Find running or cycling pace from any two of distance, time and pace. Convert min/km, min/mi, km/h and mph, with a split table.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=1">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <nav class="site-nav" aria-label="Primary">
+        <a href="index.html" class="logo"><img class="logo-icon" src="img/healthpulse-icon.svg" alt="" width="28" height="28">HealthPulse</a>
+        <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="primary-menu" onclick="var h=this.closest('.site-header'),o=h.classList.toggle('nav-open');this.setAttribute('aria-expanded',o);this.setAttribute('aria-label',o?'Close menu':'Open menu')"><span class="nav-toggle-bars" aria-hidden="true"><span></span><span></span><span></span></span>Menu</button>
+        <ul class="nav-links" id="primary-menu">
+          <li><a href="index.html">Home</a></li><li><a href="bmi.html">BMI</a></li><li><a href="calories.html">Calories</a></li><li><a href="macros.html">Macros</a></li><li><a href="body-fat.html">Body Fat</a></li><li class="nav-more"><details class="nav-details is-current"><summary>More</summary><ul id="more-menu"><li><a href="ideal-weight.html">Ideal Weight</a></li><li><a href="water.html">Water</a></li><li><a href="pace.html" class="active" aria-current="page">Pace</a></li><li><a href="heart-rate.html">Heart Rate</a></li></ul></details></li><li><a href="blog.html">Blog</a></li><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  <main class="page-wrap"><div class="container">
+    <div class="tool-panel"><div class="tool-header"><h1>Pace Calculator</h1><p>Enter any two of distance, time and pace. The third is calculated, in min/km, min/mi, km/h or mph.</p><p class="tool-device">Your numbers never leave your device.</p></div>
+    <noscript><p class="panel-note">Turn on JavaScript to calculate. Numbers stay in this browser.</p></noscript>
+    <form id="tool" novalidate>
+    <div class="seg" role="group" aria-label="Units">
+      <span class="seg-label">Units</span>
+      <button type="button" class="btn btn-outlined" id="unitMetric" aria-pressed="true">Metric</button>
+      <button type="button" class="btn btn-outlined" id="unitImperial" aria-pressed="false">Imperial</button>
+    </div>
+    <div class="input-group"><label for="distance" id="distanceLabel">Distance (km)</label><input id="distance" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-describedby="formError"></div>
+      <div class="chip-row" role="group" aria-label="Race distance">
+        <button type="button" class="btn btn-outlined" data-km="5">5K</button>
+        <button type="button" class="btn btn-outlined" data-km="10">10K</button>
+        <button type="button" class="btn btn-outlined" data-km="21.0975">Half marathon</button>
+        <button type="button" class="btn btn-outlined" data-km="42.195">Marathon</button>
+      </div>
+      <div class="input-group"><label for="time">Time</label><input id="time" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="50:00" aria-describedby="formError"></div>
+      <div class="pair-grid">
+        <div class="input-group"><label for="pace">Pace or speed</label><input id="pace" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-describedby="formError"></div>
+        <div class="input-group"><label for="paceUnit">Unit</label>
+          <select id="paceUnit">
+            <option value="minkm">min/km</option>
+            <option value="minmi">min/mi</option>
+            <option value="kmh">km/h</option>
+            <option value="mph">mph</option>
+          </select>
+        </div>
+      </div>
+      <p class="panel-note">Fill any two. The empty one is calculated. If all three are filled, editing the pace updates the time, and editing the distance or the time updates the pace. Clear a box to solve for that one.</p>
+    <p class="field-error" id="formError" role="alert"></p><div class="tool-actions"><button type="button" class="btn btn-outlined" id="clearBtn">Clear</button></div><div class="result-section show" aria-live="polite"><h3>Result</h3><div class="result-item"><span class="result-label">Pace</span>
+        <div class="result-line"><span class="result-value result-hero" id="paceHero">—</span>
+        <button type="button" class="btn btn-ghost" id="copyBtn" disabled>Copy</button></div></div><div class="result-item"><span class="result-label">min/km</span><span class="result-value" id="outMinkm">—</span></div><div class="result-item"><span class="result-label">min/mi</span><span class="result-value" id="outMinmi">—</span></div><div class="result-item"><span class="result-label">km/h</span><span class="result-value" id="outKmh">—</span></div><div class="result-item"><span class="result-label">mph</span><span class="result-value" id="outMph">—</span></div><p class="caption tool-caption" id="copyCaption"></p></div><div class="table-wrap"><table class="conv-table num-table"><thead><tr><th scope="col">Split</th><th scope="col" class="num">Lap</th><th scope="col" class="num">Cumulative</th></tr></thead><tbody id="splitBody"></tbody></table></div>
+      <p class="panel-note" id="splitNote"></p>
+    </form></div>
+    <div class="tool-panel conv-follow"><h2>Common values</h2><p class="panel-note">One mile is 1.609344 km. The 10 km row is the worked example.</p><div class="table-wrap"><table class="conv-table"><thead><tr><th scope="col">Pace</th><th scope="col">Equals</th></tr></thead><tbody><tr><td>5:00 min/km</td><td>12.0 km/h</td></tr><tr><td>5:00 min/km</td><td>8:03 min/mi</td></tr><tr><td>12.0 km/h</td><td>7.5 mph</td></tr><tr><td>10 km in 50:00</td><td>5:00 min/km, 12.0 km/h, 8:03 min/mi</td></tr><tr><td>5K / 10K</td><td>5 km / 10 km</td></tr><tr><td>Half / marathon</td><td>21.0975 km / 42.195 km</td></tr></tbody></table></div></div><div class="tool-panel conv-follow"><h2>How it's calculated</h2><p>Speed is distance divided by time. Ten kilometres in 50 minutes is 10 ÷ (50 ÷ 60) = 12.0 km/h. Pace in minutes per kilometre is 60 ÷ km/h, so 12.0 km/h is 5:00 per km.</p><p>A mile is 1.609344 km, so minutes per mile are minutes per kilometre times 1.609344. 5:00 per km is 8.05 minutes per mile, which is 8:03. Miles per hour are km/h divided by 1.609344, so 12.0 km/h is 7.5 mph.</p><p>The same arithmetic is used for running and cycling. The effort is not the same. Presets set the distance to 5 km, 10 km, a half marathon (21.0975 km) or a marathon (42.195 km). The split table walks that distance one unit at a time, or every five units if the distance is longer than 60.</p></div><div class="tool-panel conv-follow"><h2>FAQ</h2><div class="faq-list"><details><summary>Which two numbers do I need?</summary><p>Any two of distance, time, and pace or speed. Leave the third blank and it is filled in.</p></details><details><summary>What is 10 km in 50:00?</summary><p>5:00 per kilometre, 12.0 km/h, and 8:03 per mile.</p></details><details><summary>Are cycling and running the same math?</summary><p>The pace math is the same. The effort is not. A 30 km/h bike ride and a 12 km/h run are different days.</p></details><details><summary>What distances are the presets?</summary><p>5 km, 10 km, a half marathon at 21.0975 km, and a marathon at 42.195 km. The unit toggle shows those distances in miles when imperial is on.</p></details></div></div>
+    <div class="tool-panel conv-follow"><h2>Health disclaimer</h2><p class="panel-note">HealthPulse gives estimates for general information only. It is not medical advice. Talk to a doctor before big changes to diet or exercise, especially with a health condition.</p></div>
+  </div>
+  <section class="ad-section">
+      <div class="container">
+        <div class="ad-container">
+          <ins class="adsbygoogle"
+               style="display:block; width:100%; height:90px;"
+               data-ad-client="ca-pub-1234567890"
+               data-ad-slot="1234567890"
+               data-ad-format="auto"
+               data-full-width-responsive="true"></ins>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container">
+      <a href="index.html" class="logo"><img class="logo-icon" src="img/healthpulse-icon.svg" alt="" width="28" height="28">HealthPulse</a>
+      <ul class="footer-links">
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="privacy.html">Privacy Policy</a></li>
+        <li><a href="terms.html">Terms of Service</a></li>
+        <li><a href="disclaimer.html">Health Disclaimer</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="dmca.html">DMCA</a></li>
+      </ul>
+      <p class="footer-sister">Also from us: <a href="https://janvanhal.github.io/netpulse/">NetPulse</a> · <a href="https://janvanhal.github.io/unitpulse/">UnitPulse</a></p>
+      <p class="footer-disclaimer">HealthPulse gives estimates for general information only. It is not medical advice. Talk to a doctor before big changes to diet or exercise, especially with a health condition.</p>
+      <p class="footer-device">Your numbers never leave your device.</p>
+      <p class="footer-copy">&copy; 2026 HealthPulse. Free tools, privacy first.</p>
+    </div>
+  </footer>
+<script>
+(function () {
+function parseNum(raw) {
+  var s = String(raw == null ? "" : raw).trim().replace(/[\s\u00a0\u202f]/g, "");
+  if (!s) return null;
+  var commas = s.split(",").length - 1;
+  var hasComma = commas > 0;
+  var hasDot = s.indexOf(".") !== -1;
+  if (hasComma && hasDot) {
+    if (s.lastIndexOf(",") > s.lastIndexOf(".")) s = s.replace(/\./g, "").replace(",", ".");
+    else s = s.replace(/,/g, "");
+  } else if (hasComma) {
+    if (commas > 1) return NaN;
+    s = s.replace(",", ".");
+  }
+  s = s.replace(/[.,]$/, "");
+  if (!/^[+-]?(?:\d+)(?:\.\d+)?$/.test(s)) return NaN;
+  var n = Number(s);
+  return Number.isFinite(n) ? n : NaN;
+}
+
+function roundTo(n, digits) {
+  var f = Math.pow(10, digits | 0);
+  return Math.round((n + Number.EPSILON) * f) / f;
+}
+
+function formatFixed(n, digits) {
+  if (!Number.isFinite(n)) return "—";
+  var d = digits | 0;
+  var neg = n < 0;
+  var s = Math.abs(n).toFixed(d);
+  var bits = s.split(".");
+  bits[0] = bits[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return (neg ? "-" : "") + (bits.length > 1 ? bits[0] + "." + bits[1] : bits[0]);
+}
+
+function showTrim(n, digits) {
+  if (!Number.isFinite(n)) return "";
+  var s = roundTo(n, digits).toFixed(digits);
+  if (s.indexOf(".") !== -1) s = s.replace(/0+$/, "").replace(/\.$/, "");
+  return s;
+}
+
+var KG_PER_LB = 0.45359237;
+var CM_PER_IN = 2.54;
+var KM_PER_MI = 1.609344;
+
+function cmToFtIn(cm) {
+  var total = cm / CM_PER_IN;
+  var ft = Math.floor(total / 12 + 1e-9);
+  var inch = roundTo(total - ft * 12, 2);
+  if (inch >= 12) { ft += 1; inch = 0; }
+  return { ft: ft, inch: inch };
+}
+
+function ftInToCm(ft, inch) {
+  return ((ft || 0) * 12 + (inch || 0)) * CM_PER_IN;
+}
+
+function bmiValue(kg, cm) {
+  var m = cm / 100;
+  return kg / (m * m);
+}
+
+function bmiCategory(bmi) {
+  if (bmi < 18.5) return "Underweight";
+  if (bmi < 25) return "Normal";
+  if (bmi < 30) return "Overweight";
+  return "Obese";
+}
+
+function asianNote(bmi) {
+  if (bmi < 23) return "Below the Asian overweight cut-off of 23.";
+  if (bmi < 27.5) return "In the Asian overweight band, from 23 up to 27.5.";
+  return "At or above the Asian obesity cut-off of 27.5.";
+}
+
+function bmrMifflin(sex, kg, cm, age) {
+  var base = 10 * kg + 6.25 * cm - 5 * age;
+  return sex === "female" ? base - 161 : base + 5;
+}
+
+var MACRO_PRESETS = {
+  balanced: { p: 30, c: 40, f: 30 },
+  high: { p: 40, c: 30, f: 30 },
+  low: { p: 30, c: 20, f: 50 }
+};
+
+function macroSplit(kcal, preset, custom, perKg, weightKg, gPerKg) {
+  if (!(kcal > 0)) return { error: "Enter a calorie target greater than zero." };
+  var ratio = preset === "custom" ? custom : MACRO_PRESETS[preset];
+  if (!ratio) return { error: "Choose a split." };
+  var p = Number(ratio.p), c = Number(ratio.c), f = Number(ratio.f);
+  if (![p, c, f].every(Number.isFinite)) return { error: "Enter a number for each percentage." };
+  if (perKg) {
+    if (!(weightKg > 0)) return { error: "Enter a body weight greater than zero." };
+    if (!(gPerKg > 0)) return { error: "Enter grams of protein per kilogram." };
+    var proteinG = weightKg * gPerKg;
+    var proteinKcal = proteinG * 4;
+    if (proteinKcal > kcal + 0.5) return { error: "Protein at that amount is more calories than the target. Lower the grams per kilogram or raise the calories." };
+    var rest = kcal - proteinKcal;
+    var cf = c + f;
+    if (!(cf > 0)) return { error: "Carbohydrate and fat need a share of the calories that remain after protein." };
+    var carbKcal = rest * (c / cf);
+    var fatKcal = rest * (f / cf);
+    return finishMacros(kcal, proteinKcal, carbKcal, fatKcal);
+  }
+  if (Math.abs(p + c + f - 100) > 0.5) return { error: "Protein, carbohydrate and fat need to add up to 100%." };
+  if (p < 0 || c < 0 || f < 0) return { error: "Percentages cannot be negative." };
+  return finishMacros(kcal, kcal * p / 100, kcal * c / 100, kcal * f / 100);
+}
+
+function finishMacros(kcal, pK, cK, fK) {
+  return {
+    error: "",
+    kcal: kcal,
+    pKcal: pK, cKcal: cK, fKcal: fK,
+    pG: pK / 4, cG: cK / 4, fG: fK / 9,
+    pPct: pK / kcal * 100, cPct: cK / kcal * 100, fPct: fK / kcal * 100
+  };
+}
+
+function navyBodyFat(sex, heightCm, neckCm, waistCm, hipCm) {
+  if (!(heightCm > 0) || !(neckCm > 0) || !(waistCm > 0)) return NaN;
+  var density;
+  if (sex === "female") {
+    if (!(hipCm > 0)) return NaN;
+    var circ = waistCm + hipCm - neckCm;
+    if (!(circ > 0)) return NaN;
+    density = 1.29579 - 0.35004 * Math.log10(circ) + 0.22100 * Math.log10(heightCm);
+  } else {
+    var diff = waistCm - neckCm;
+    if (!(diff > 0)) return NaN;
+    density = 1.0324 - 0.19077 * Math.log10(diff) + 0.15456 * Math.log10(heightCm);
+  }
+  if (!(density > 0)) return NaN;
+  return 495 / density - 450;
+}
+
+function bfCategory(sex, pct) {
+  var bands = sex === "female"
+    ? [[14, "Essential"], [21, "Athletes"], [25, "Fitness"], [32, "Average"]]
+    : [[6, "Essential"], [14, "Athletes"], [18, "Fitness"], [25, "Average"]];
+  for (var i = 0; i < bands.length; i++) if (pct < bands[i][0]) return bands[i][1];
+  return "Obese";
+}
+
+function idealWeights(sex, heightCm) {
+  var inches = heightCm / CM_PER_IN;
+  var over = inches - 60;
+  var male = sex !== "female";
+  var devine = (male ? 50 : 45.5) + 2.3 * over;
+  var robinson = (male ? 52 : 49) + (male ? 1.9 : 1.7) * over;
+  var miller = (male ? 56.2 : 53.1) + (male ? 1.41 : 1.36) * over;
+  var m2 = Math.pow(heightCm / 100, 2);
+  return { devine: devine, robinson: robinson, miller: miller, low: 18.5 * m2, high: 24.9 * m2, over: over };
+}
+
+function waterIntake(weightKg, minutes, hot) {
+  var base = weightKg * 33;
+  var exercise = (minutes > 0 ? minutes : 0) / 30 * 350;
+  var heat = hot ? 500 : 0;
+  var ml = base + exercise + heat;
+  return { base: base, exercise: exercise, heat: heat, ml: ml, litres: ml / 1000, glasses: ml / 250 };
+}
+
+function parseDuration(raw) {
+  var s = String(raw == null ? "" : raw).trim();
+  if (!s) return null;
+  if (s.indexOf(":") === -1) {
+    var n = parseNum(s);
+    if (n === null || Number.isNaN(n)) return n;
+    return n * 60;
+  }
+  var parts = s.split(":");
+  if (parts.length < 2 || parts.length > 3) return NaN;
+  var nums = [];
+  for (var i = 0; i < parts.length; i++) {
+    var v = parseNum(parts[i]);
+    if (v === null || Number.isNaN(v) || v < 0) return NaN;
+    nums.push(v);
+  }
+  if (nums.length === 2) return nums[0] * 60 + nums[1];
+  return nums[0] * 3600 + nums[1] * 60 + nums[2];
+}
+
+function formatDuration(sec) {
+  if (!Number.isFinite(sec) || sec < 0) return "—";
+  var total = Math.round(sec);
+  var h = Math.floor(total / 3600);
+  var m = Math.floor((total % 3600) / 60);
+  var s = total % 60;
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  if (h > 0) return h + ":" + pad(m) + ":" + pad(s);
+  return m + ":" + pad(s);
+}
+
+function speedKmh(distanceKm, timeSec) {
+  return distanceKm / (timeSec / 3600);
+}
+
+function paceLabel(kmh, unit) {
+  if (!(kmh > 0)) return "—";
+  if (unit === "minkm") return formatDuration(3600 / kmh);
+  if (unit === "minmi") return formatDuration(3600 / kmh * KM_PER_MI);
+  if (unit === "mph") return formatFixed(kmh / KM_PER_MI, 1);
+  return formatFixed(kmh, 1);
+}
+
+function kmhFromPace(raw, unit) {
+  if (unit === "minkm" || unit === "minmi") {
+    var sec = parseDuration(raw);
+    if (sec === null || Number.isNaN(sec)) return sec;
+    if (!(sec > 0)) return NaN;
+    var minPerKm = unit === "minkm" ? sec / 60 : (sec / 60) / KM_PER_MI;
+    return 60 / minPerKm;
+  }
+  var n = parseNum(raw);
+  if (n === null || Number.isNaN(n)) return n;
+  if (!(n > 0)) return NaN;
+  return unit === "mph" ? n * KM_PER_MI : n;
+}
+
+function solvePace(d, t, kmh, prefer) {
+  var badD = Number.isNaN(d), badT = Number.isNaN(t), badP = Number.isNaN(kmh);
+  if (badD || badT || badP) return { error: "Enter a number. Time can look like 50:00, and a pace like 5:00." };
+  var haveD = d !== null, haveT = t !== null, haveP = kmh !== null;
+  var count = (haveD ? 1 : 0) + (haveT ? 1 : 0) + (haveP ? 1 : 0);
+  if (count < 2) return { error: "", empty: true };
+  var target = !haveD ? "distance" : !haveT ? "time" : !haveP ? "pace" : (prefer === "pace" || prefer === "paceunit" ? "time" : "pace");
+  if (target === "pace") {
+    if (!(d > 0) || !(t > 0)) return { error: "Distance and time need to be greater than zero." };
+    return { distanceKm: d, timeSec: t, kmh: d / (t / 3600), target: target };
+  }
+  if (target === "time") {
+    if (!(d > 0) || !(kmh > 0)) return { error: "Distance and pace need to be greater than zero." };
+    return { distanceKm: d, timeSec: d / kmh * 3600, kmh: kmh, target: target };
+  }
+  if (!(t > 0) || !(kmh > 0)) return { error: "Time and pace need to be greater than zero." };
+  return { distanceKm: kmh * (t / 3600), timeSec: t, kmh: kmh, target: target };
+}
+
+function paceSplits(distanceKm, timeSec, imperial) {
+  var total = imperial ? distanceKm / KM_PER_MI : distanceKm;
+  if (!(total > 0) || !(timeSec > 0)) return { rows: [], step: 1 };
+  var secPer = timeSec / total;
+  var full = Math.floor(total + 1e-9);
+  var step = full > 60 ? 5 : 1;
+  var rows = [];
+  var prev = 0;
+  for (var i = step; i <= full; i += step) {
+    rows.push({ at: i, lap: secPer * (i - prev), cum: secPer * i });
+    prev = i;
+  }
+  if (total - prev > 0.01) rows.push({ at: roundTo(total, 3), lap: secPer * (total - prev), cum: timeSec });
+  return { rows: rows, step: step };
+}
+
+function tanakaMax(age) { return 208 - 0.7 * age; }
+function foxMax(age) { return 220 - age; }
+
+function hrZones(max, rest) {
+  var bands = [
+    [0.50, 0.60, "1 · Recovery", "Easy effort for warm-up and cool-down."],
+    [0.60, 0.70, "2 · Endurance", "You can talk in sentences. Base aerobic work."],
+    [0.70, 0.80, "3 · Tempo", "Comfortably hard. Builds aerobic fitness."],
+    [0.80, 0.90, "4 · Threshold", "Hard, near the point where effort rises quickly."],
+    [0.90, 1.00, "5 · Maximum", "Very hard. Short efforts only."]
+  ];
+  return bands.map(function (b) {
+    var row = {
+      name: b[2], use: b[3],
+      pct: Math.round(b[0] * 100) + "–" + Math.round(b[1] * 100) + "%",
+      low: Math.round(max * b[0]), high: Math.round(max * b[1]),
+      kLow: null, kHigh: null
+    };
+    if (rest != null && rest < max) {
+      var reserve = max - rest;
+      row.kLow = Math.round(rest + reserve * b[0]);
+      row.kHigh = Math.round(rest + reserve * b[1]);
+    }
+    return row;
+  });
+}
+
+function readLengthCm(metricId, ftId, inId) {
+  if (getUnits() !== "imperial") return parseNum(document.getElementById(metricId).value);
+  var ft = parseNum(document.getElementById(ftId).value);
+  var inch = parseNum(document.getElementById(inId).value);
+  if (ft === null && inch === null) return null;
+  if (Number.isNaN(ft) || Number.isNaN(inch)) return NaN;
+  if ((ft !== null && ft < 0) || (inch !== null && inch < 0)) return NaN;
+  return ftInToCm(ft || 0, inch || 0);
+}
+
+function writeLengthCm(cm, metricId, ftId, inId) {
+  var imperial = getUnits() === "imperial";
+  var metricWrap = document.getElementById(metricId + "Wrap");
+  var imperialWrap = document.getElementById(ftId + "Wrap");
+  if (metricWrap) metricWrap.hidden = imperial;
+  if (imperialWrap) imperialWrap.hidden = !imperial;
+  var metricEl = document.getElementById(metricId);
+  var ftEl = document.getElementById(ftId);
+  var inEl = document.getElementById(inId);
+  if (cm === null || Number.isNaN(cm)) {
+    metricEl.value = "";
+    ftEl.value = "";
+    inEl.value = "";
+    return;
+  }
+  if (imperial) {
+    var fi = cmToFtIn(cm);
+    ftEl.value = String(fi.ft);
+    inEl.value = showTrim(fi.inch, 2);
+  } else metricEl.value = showTrim(cm, 1);
+}
+
+function readMassKg(id) {
+  var n = parseNum(document.getElementById(id).value);
+  if (n === null || Number.isNaN(n)) return n;
+  return getUnits() === "imperial" ? n * KG_PER_LB : n;
+}
+
+function writeMassKg(kg, id) {
+  var el = document.getElementById(id);
+  var label = document.querySelector('label[for="' + id + '"]');
+  if (label && label.dataset.base) label.textContent = label.dataset.base + (getUnits() === "imperial" ? " (lb)" : " (kg)");
+  if (kg === null || Number.isNaN(kg)) { el.value = ""; return; }
+  el.value = getUnits() === "imperial" ? showTrim(kg / KG_PER_LB, 1) : showTrim(kg, 1);
+}
+
+function readCm(id) {
+  var n = parseNum(document.getElementById(id).value);
+  if (n === null || Number.isNaN(n)) return n;
+  return getUnits() === "imperial" ? n * CM_PER_IN : n;
+}
+
+function writeCm(cm, id) {
+  var el = document.getElementById(id);
+  var label = document.querySelector('label[for="' + id + '"]');
+  if (label && label.dataset.base) label.textContent = label.dataset.base + (getUnits() === "imperial" ? " (in)" : " (cm)");
+  if (cm === null || Number.isNaN(cm)) { el.value = ""; return; }
+  el.value = getUnits() === "imperial" ? showTrim(cm / CM_PER_IN, 2) : showTrim(cm, 1);
+}
+
+function readSex() {
+  var el = document.querySelector('input[name="sex"]:checked');
+  return el ? el.value : "male";
+}
+
+function writeSex(sex) {
+  var el = document.querySelector('input[name="sex"][value="' + (sex === "female" ? "female" : "male") + '"]');
+  if (el) el.checked = true;
+}
+
+function loadRaw(key) {
+  try {
+    var raw = localStorage.getItem(key);
+    if (!raw) return null;
+    var data = JSON.parse(raw);
+    if (!data || typeof data !== "object") return null;
+    return data;
+  } catch (e) { return null; }
+}
+
+function saveState(key, data) {
+  try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
+}
+
+function getUnits() {
+  try { return localStorage.getItem("healthpulse:units") === "imperial" ? "imperial" : "metric"; }
+  catch (e) { return "metric"; }
+}
+
+function setUnits(u) {
+  try { localStorage.setItem("healthpulse:units", u); } catch (e) {}
+}
+
+function fallbackCopy(text, done, captionEl) {
+  var ta = document.createElement("textarea");
+  ta.value = text;
+  ta.setAttribute("readonly", "");
+  ta.style.position = "fixed";
+  ta.style.left = "-9999px";
+  document.body.appendChild(ta);
+  ta.select();
+  var ok = false;
+  try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+  document.body.removeChild(ta);
+  if (ok) done();
+  else if (captionEl) captionEl.textContent = "Copy failed. Select the result and copy it manually.";
+}
+
+function bindForm(render) {
+  var form = document.getElementById("tool");
+  form.addEventListener("input", render);
+  form.addEventListener("change", render);
+  form.addEventListener("submit", function (e) { e.preventDefault(); render(); });
+}
+
+function bindCopy(getText) {
+  var btn = document.getElementById("copyBtn");
+  if (!btn) return;
+  btn.addEventListener("click", function () {
+    var text = getText();
+    if (!text) return;
+    var done = function () {
+      btn.textContent = "Copied";
+      window.setTimeout(function () { btn.textContent = "Copy"; }, 1500);
+    };
+    var caption = document.getElementById("copyCaption");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function () { fallbackCopy(text, done, caption); });
+    } else fallbackCopy(text, done, caption);
+  });
+}
+
+function setCopyEnabled(on) {
+  var btn = document.getElementById("copyBtn");
+  if (btn) btn.disabled = !on;
+}
+
+function setError(msg) {
+  var el = document.getElementById("formError");
+  if (el) el.textContent = msg || "";
+}
+
+function bindUnits(before, after) {
+  var metricBtn = document.getElementById("unitMetric");
+  var imperialBtn = document.getElementById("unitImperial");
+  function sync() {
+    var imperial = getUnits() === "imperial";
+    metricBtn.setAttribute("aria-pressed", imperial ? "false" : "true");
+    imperialBtn.setAttribute("aria-pressed", imperial ? "true" : "false");
+  }
+  function go(next) {
+    if (getUnits() === next) return;
+    if (before && before() === false) return;
+    setUnits(next);
+    sync();
+    after();
+  }
+  metricBtn.addEventListener("click", function () { go("metric"); });
+  imperialBtn.addEventListener("click", function () { go("imperial"); });
+  sync();
+}
+
+function bothMass(kg) {
+  var lb = kg / KG_PER_LB;
+  return formatFixed(kg, 1) + " kg (" + formatFixed(lb, 1) + " lb)";
+}
+
+
+var KEY = "healthpulse:pace";
+var model = { distanceKm: 10, timeSec: 3000, paceUnit: "minkm" };
+var saved = loadRaw(KEY);
+if (saved && ("distanceKm" in saved)) {
+  model.distanceKm = saved.distanceKm === null ? null : Number(saved.distanceKm);
+  model.timeSec = saved.timeSec === null ? null : Number(saved.timeSec);
+  model.paceUnit = saved.paceUnit || "minkm";
+}
+var prefer = "time";
+var copyText = "";
+var NL = String.fromCharCode(10);
+function labelDistance() {
+  document.getElementById("distanceLabel").textContent = "Distance (" + (getUnits() === "imperial" ? "mi" : "km") + ")";
+}
+function readDistance() {
+  var n = parseNum(document.getElementById("distance").value);
+  if (n === null || Number.isNaN(n)) return n;
+  if (n < 0) return NaN;
+  return getUnits() === "imperial" ? n * KM_PER_MI : n;
+}
+function writeDistance(km) {
+  var el = document.getElementById("distance");
+  if (km === null || Number.isNaN(km)) { el.value = ""; return; }
+  var shown = getUnits() === "imperial" ? km / KM_PER_MI : km;
+  el.value = showTrim(shown, 4);
+}
+function writeTime(sec) {
+  document.getElementById("time").value = (sec === null || Number.isNaN(sec)) ? "" : formatDuration(sec);
+}
+function writePace(kmh) {
+  var unit = document.getElementById("paceUnit").value;
+  document.getElementById("pace").value = !(kmh > 0) ? "" : paceLabel(kmh, unit);
+}
+function clearResults() {
+  ["paceHero", "outMinkm", "outMinmi", "outKmh", "outMph"].forEach(function (id) { document.getElementById(id).textContent = "—"; });
+  document.getElementById("splitBody").textContent = "";
+  document.getElementById("splitNote").textContent = "";
+  document.getElementById("copyCaption").textContent = "";
+  setCopyEnabled(false); copyText = "";
+}
+function showSplits(distanceKm, timeSec) {
+  var imperial = getUnits() === "imperial";
+  var pack = paceSplits(distanceKm, timeSec, imperial);
+  var body = document.getElementById("splitBody");
+  body.textContent = "";
+  var unit = imperial ? " mi" : " km";
+  pack.rows.forEach(function (row) {
+    var tr = document.createElement("tr");
+    var at = (row.at % 1 === 0) ? String(row.at) : showTrim(row.at, 3);
+    tr.innerHTML = "<td>" + at + unit + "</td><td class=\"num\">" + formatDuration(row.lap) + "</td><td class=\"num\">" + formatDuration(row.cum) + "</td>";
+    body.appendChild(tr);
+  });
+  document.getElementById("splitNote").textContent = pack.step > 1 ? "Splits are every " + pack.step + (imperial ? " miles" : " km") + " because the distance is long." : "";
+}
+function render() {
+  labelDistance();
+  var d = readDistance();
+  var t = parseDuration(document.getElementById("time").value);
+  var unit = document.getElementById("paceUnit").value;
+  var p = kmhFromPace(document.getElementById("pace").value, unit);
+  if (Number.isNaN(d) || Number.isNaN(t) || Number.isNaN(p)) { setError("Enter a number. Time can look like 50:00, and a pace like 5:00."); clearResults(); return; }
+  var solved = solvePace(d, t, p, prefer);
+  if (solved.error) { setError(solved.error); clearResults(); return; }
+  if (solved.empty || !(solved.kmh > 0)) {
+    setError(""); clearResults();
+    model.distanceKm = d; model.timeSec = t; model.paceUnit = unit;
+    saveState(KEY, { distanceKm: d, timeSec: t, paceUnit: unit });
+    return;
+  }
+  setError("");
+  if (solved.target === "pace") writePace(solved.kmh);
+  if (solved.target === "time") writeTime(solved.timeSec);
+  if (solved.target === "distance") writeDistance(solved.distanceKm);
+  model = { distanceKm: solved.distanceKm, timeSec: solved.timeSec, paceUnit: unit };
+  saveState(KEY, model);
+  document.getElementById("paceHero").textContent = paceLabel(solved.kmh, unit);
+  document.getElementById("outMinkm").textContent = paceLabel(solved.kmh, "minkm");
+  document.getElementById("outMinmi").textContent = paceLabel(solved.kmh, "minmi");
+  document.getElementById("outKmh").textContent = paceLabel(solved.kmh, "kmh") + " km/h";
+  document.getElementById("outMph").textContent = paceLabel(solved.kmh, "mph") + " mph";
+  showSplits(solved.distanceKm, solved.timeSec);
+  document.getElementById("copyCaption").textContent = "1 mile = 1.609344 km.";
+  copyText = [paceLabel(solved.kmh, "minkm") + " min/km", paceLabel(solved.kmh, "minmi") + " min/mi", paceLabel(solved.kmh, "kmh") + " km/h", paceLabel(solved.kmh, "mph") + " mph"].join(NL);
+  setCopyEnabled(true);
+}
+document.getElementById("tool").addEventListener("input", function (e) {
+  if (e.target.id === "distance") prefer = "distance";
+  else if (e.target.id === "time") prefer = "time";
+  else if (e.target.id === "pace") prefer = "pace";
+});
+document.getElementById("paceUnit").addEventListener("change", function () {
+  if (model.distanceKm > 0 && model.timeSec > 0) {
+    document.getElementById("paceUnit").value = document.getElementById("paceUnit").value;
+    writePace(model.distanceKm / (model.timeSec / 3600));
+    model.paceUnit = document.getElementById("paceUnit").value;
+    saveState(KEY, model);
+    prefer = "time";
+  } else prefer = "paceunit";
+});
+document.querySelectorAll("[data-km]").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    writeDistance(Number(btn.getAttribute("data-km")));
+    prefer = "preset";
+    render();
+  });
+});
+document.getElementById("clearBtn").addEventListener("click", function () {
+  model = { distanceKm: null, timeSec: null, paceUnit: document.getElementById("paceUnit").value };
+  writeDistance(null); writeTime(null); document.getElementById("pace").value = "";
+  saveState(KEY, model); setError(""); clearResults(); labelDistance();
+});
+bindForm(render);
+bindUnits(function () {
+  var n = parseNum(document.getElementById("distance").value);
+  var t = parseDuration(document.getElementById("time").value);
+  if (Number.isNaN(n) || Number.isNaN(t)) { setError("Enter a number. Time can look like 50:00, and a pace like 5:00."); return false; }
+  model.distanceKm = n === null ? null : (getUnits() === "imperial" ? n * KM_PER_MI : n);
+  model.timeSec = t;
+  return true;
+}, function () {
+  writeDistance(model.distanceKm);
+  writeTime(model.timeSec);
+  document.getElementById("pace").value = "";
+  prefer = "time";
+  render();
+});
+bindCopy(function () { return copyText; });
+document.getElementById("paceUnit").value = model.paceUnit || "minkm";
+labelDistance();
+writeDistance(model.distanceKm);
+writeTime(model.timeSec);
+document.getElementById("pace").value = "";
+prefer = "time";
+render();
+
+})();
+</script>
+</body>
+</html>
